@@ -1,0 +1,13 @@
+{
+  "name": "webpack-project",
+  "version": "1.0.0",
+  "description": "set up the environment for webpack",
+  "main": "index.js",
+  "repository": "git@github.com:scott-x/webpack-project.git",
+  "author": "scottxiong <github.scott.bear@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "html-webpack-plugin": "2.30.1",
+    "webpack": "3.10.0"
+  }
+}
