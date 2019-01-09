@@ -282,6 +282,413 @@ module.exports = {
 ```
 #### 支持sass
 ```
-yarn add sass-loader@6.0.6 --dev
-yarn add node-sass@4.7.2 --dev
+ yarn add sass-loader@6.0.6 --dev
+ yarn add node-sass@4.7.2 --dev
 ```
+```
+var HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require("extract-text-webpack-plugin");
+
+const path = require('path');
+
+module.exports = {
+  entry: './src/app.js',
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    // publicPath:'/dist/',
+    filename: 'app.js'
+  },
+  module: {
+    rules: [
+      //react文件的处理
+      {
+        test: /\.js$/,
+        exclude: /(node_modules|bower_components)/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['env','react']
+          }
+        }
+      },
+      {
+        test: /\.css$/,
+        use: ExtractTextPlugin.extract({
+          fallback: "style-loader",
+          use: "css-loader"
+        })
+      },
+      {
+        test: /\.scss$/,
+        use: ExtractTextPlugin.extract({
+          fallback: 'style-loader',
+          //如果需要，可以在 sass-loader 之前将 resolve-url-loader 链接进来
+          use: ['css-loader', 'sass-loader']
+        })
+      }
+    ]
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+       template: './src/index.html'
+    }),
+    new ExtractTextPlugin('style.css')
+  ]
+};
+```
+## 图片处理
+打开指南/资源管理/加载图片，可以看到使用file-loader,但是我们选择的是url-loader(功能类似于file-loader,还有个功能是对于小图片直接返回base64)，ulr-loader 依赖file-loader，所以两个都要装
+```
+yarn add file-loader@1.1.6 url-loader@0.6.2 --dev
+```
+```
+var HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require("extract-text-webpack-plugin");
+
+const path = require('path');
+
+module.exports = {
+  entry: './src/app.js',
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    // publicPath:'/dist/',
+    filename: 'app.js'
+  },
+  module: {
+    rules: [
+      //react文件的处理
+      {
+        test: /\.js$/,
+        exclude: /(node_modules|bower_components)/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['env','react']
+          }
+        }
+      },
+      {
+        test: /\.css$/,
+        use: ExtractTextPlugin.extract({
+          fallback: "style-loader",
+          use: "css-loader"
+        })
+      },
+      {
+        test: /\.scss$/,
+        use: ExtractTextPlugin.extract({
+          fallback: 'style-loader',
+          //如果需要，可以在 sass-loader 之前将 resolve-url-loader 链接进来
+          use: ['css-loader', 'sass-loader']
+        })
+      },
+      //图片的处理
+      {
+        test: /\.(png|jpg|gif)$/,
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              //文件低于8k就转化base64
+              limit: 8192
+            }
+          }
+        ]
+      }
+    ]
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+       template: './src/index.html'
+    }),
+    new ExtractTextPlugin('style.css')
+  ]
+};
+```
+## 配置字体，以font-awesome为例
+```
+yarn add font-awesome
+# app.js
+import 'font-awesome/css/font-awesome.min.css';
+```
+```
+var HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require("extract-text-webpack-plugin");
+
+const path = require('path');
+
+module.exports = {
+  entry: './src/app.js',
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    // publicPath:'/dist/',
+    filename: 'app.js'
+  },
+  module: {
+    rules: [
+      //react文件的处理
+      {
+        test: /\.js$/,
+        exclude: /(node_modules|bower_components)/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['env','react']
+          }
+        }
+      },
+      {
+        test: /\.css$/,
+        use: ExtractTextPlugin.extract({
+          fallback: "style-loader",
+          use: "css-loader"
+        })
+      },
+      {
+        test: /\.scss$/,
+        use: ExtractTextPlugin.extract({
+          fallback: 'style-loader',
+          //如果需要，可以在 sass-loader 之前将 resolve-url-loader 链接进来
+          use: ['css-loader', 'sass-loader']
+        })
+      },
+      //图片的处理
+      {
+        test: /\.(png|jpg|gif)$/,
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              //文件低于8k就转化base64
+              limit: 8192
+            }
+          }
+        ]
+      },
+      {
+         test: /\.(woff|woff2|eot|ttf|otf|svg)$/,
+         use: [
+           'file-loader'
+         ]
+      }
+    ]
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+       template: './src/index.html'
+    }),
+    new ExtractTextPlugin('style.css')
+  ]
+};
+```
+## 提出通用模块,webpack自带的
+```
+var HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require("extract-text-webpack-plugin");
+const webpack = require('webpack');
+const path = require('path');
+
+module.exports = {
+  entry: './src/app.js',
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    // publicPath:'/dist/',
+    filename: 'js/app.js'
+  },
+  module: {
+    rules: [
+      //react文件的处理
+      {
+        test: /\.js$/,
+        exclude: /(node_modules|bower_components)/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['env','react']
+          }
+        }
+      },
+      {
+        test: /\.css$/,
+        use: ExtractTextPlugin.extract({
+          fallback: "style-loader",
+          use: "css-loader"
+        })
+      },
+      {
+        test: /\.scss$/,
+        use: ExtractTextPlugin.extract({
+          fallback: 'style-loader',
+          //如果需要，可以在 sass-loader 之前将 resolve-url-loader 链接进来
+          use: ['css-loader', 'sass-loader']
+        })
+      },
+      //图片的处理
+      {
+        test: /\.(png|jpg|gif)$/,
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              //文件低于8k就转化base64
+              limit: 8192,
+              name:'resource/[name].[ext]'
+            }
+          }
+        ]
+      },
+      {
+         test: /\.(woff|woff2|eot|ttf|otf|svg)$/,
+         use: [
+          {
+            loader: 'url-loader',
+            options: {
+              //文件低于8k就转化base64
+              limit: 8192,
+              name:'resource/[name].[ext]'
+            }
+          }
+        ]
+      }
+    ]
+  },
+  plugins: [
+    // 处理html文件
+    new HtmlWebpackPlugin({
+       template: './src/index.html'
+    }),
+    //独立css文件
+    new ExtractTextPlugin('css/[name].css'),
+    //提出公共模块
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'common',
+      filename: 'js/base.js'
+    })
+  ]
+};
+```
+## 到此webpack配置告一段落
+但是每次改代码都要执行一遍`node_modules/.bin/webpack`,再刷新浏览器，因此我们需要一个server,
+```
+yarn add webpack-dev-server@2.9.7 --dev
+# 启动
+node_modules/.bin/webpack-dev-server
+```
+打开浏览器：http://127.0.0.1:8080/，发现报错了，打开控制台,字体和图片都找不到了，原因是webpack启动的是根目录，而它直接从css目录开始找的，少了一层dist
+```
+GET http://127.0.0.1:8080/css/resource/test.jpg 404 (Not Found)
+3127.0.0.1/:1 GET http://127.0.0.1:8080/css/resource/fontawesome-webfont.woff2 net::ERR_ABORTED 404 (Not Found)
+```
+```
+# 添加publicPath
+output: {
+    path: path.resolve(__dirname, 'dist'),
+    publicPath:'/dist/',
+    filename: 'js/app.js'
+},
+# 那么devServer里的contentBase就可以去掉了
+devServer: {
+     //contentBase: './dist'
+}
+```
+访问http://127.0.0.1:8080/dist/index.html ， 大功告成
+## 优化
+由于8080很多服务器在用，如apache, nginx, caddy, 所以把webpack-dev-server的端口改一下，如8086，最终配置如下
+```
+var HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require("extract-text-webpack-plugin");
+const webpack = require('webpack');
+const path = require('path');
+
+module.exports = {
+  entry: './src/app.js',
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    publicPath:'/dist/',
+    filename: 'js/app.js'
+  },
+  module: {
+    rules: [
+      //react文件的处理
+      {
+        test: /\.js$/,
+        exclude: /(node_modules|bower_components)/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['env','react']
+          }
+        }
+      },
+      {
+        test: /\.css$/,
+        use: ExtractTextPlugin.extract({
+          fallback: "style-loader",
+          use: "css-loader"
+        })
+      },
+      {
+        test: /\.scss$/,
+        use: ExtractTextPlugin.extract({
+          fallback: 'style-loader',
+          //如果需要，可以在 sass-loader 之前将 resolve-url-loader 链接进来
+          use: ['css-loader', 'sass-loader']
+        })
+      },
+      //图片的处理
+      {
+        test: /\.(png|jpg|gif)$/,
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              //文件低于8k就转化base64
+              limit: 8192,
+              name:'resource/[name].[ext]'
+            }
+          }
+        ]
+      },
+      {
+         test: /\.(woff|woff2|eot|ttf|otf|svg)$/,
+         use: [
+          {
+            loader: 'url-loader',
+            options: {
+              //文件低于8k就转化base64
+              limit: 8192,
+              name:'resource/[name].[ext]'
+            }
+          }
+        ]
+      }
+    ]
+  },
+  plugins: [
+    // 处理html文件
+    new HtmlWebpackPlugin({
+       template: './src/index.html'
+    }),
+    //独立css文件
+    new ExtractTextPlugin('css/[name].css'),
+    //提出公共模块
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'common',
+      filename: 'js/base.js'
+    })
+  ],
+  devServer: {
+    port:8086
+  }
+};
+```
+#### 另外还报了个favicon的错误
+解决办法，在线生成一个favicon然后放入项目的根目录即可
+#### 添加开发和线上脚本
+```
+ "scripts":{
+    "dev":"node_modules/.bin/webpack-dev-server",
+    "dist":"node_modules/.bin/webpack -p"
+  }
+```
+## 至此webpack的内容结束，可以尽情玩耍es6 和 react了

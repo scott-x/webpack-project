@@ -1,6 +1,6 @@
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
-
+const webpack = require('webpack');
 const path = require('path');
 
 module.exports = {
@@ -8,15 +8,8 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     publicPath:'/dist/',
-    filename: 'app.js'
+    filename: 'js/app.js'
   },
-  plugins: [
-	  new HtmlWebpackPlugin({
-	  	 title: 'My App',
-         template: './src/index.html'
-	  }),
-    new ExtractTextPlugin("index.css"),
-  ],
   module: {
     rules: [
       //react文件的处理
@@ -30,15 +23,13 @@ module.exports = {
           }
         }
       },
-      //css文件的处理
       {
         test: /\.css$/,
         use: ExtractTextPlugin.extract({
-              fallback: "style-loader",
-              use: "css-loader"
+          fallback: "style-loader",
+          use: "css-loader"
         })
       },
-      //sass文件的处理
       {
         test: /\.scss$/,
         use: ExtractTextPlugin.extract({
@@ -46,7 +37,50 @@ module.exports = {
           //如果需要，可以在 sass-loader 之前将 resolve-url-loader 链接进来
           use: ['css-loader', 'sass-loader']
         })
+      },
+      //图片的处理
+      {
+        test: /\.(png|jpg|gif)$/,
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              //文件低于8k就转化base64
+              limit: 8192,
+              name:'resource/[name].[ext]'
+            }
+          }
+        ]
+      },
+      {
+         test: /\.(woff|woff2|eot|ttf|otf|svg)$/,
+         use: [
+          {
+            loader: 'url-loader',
+            options: {
+              //文件低于8k就转化base64
+              limit: 8192,
+              name:'resource/[name].[ext]'
+            }
+          }
+        ]
       }
     ]
+  },
+  plugins: [
+    // 处理html文件
+    new HtmlWebpackPlugin({
+       template: './src/index.html'
+    }),
+    //独立css文件
+    new ExtractTextPlugin('css/[name].css'),
+    //提出公共模块
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'common',
+      filename: 'js/base.js'
+    })
+  ],
+  devServer: {
+    port:8086
   }
 };
